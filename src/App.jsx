@@ -8,47 +8,38 @@ class App extends Component {
     super(props);
     this.state ={
       currentUser: {name: "Bob"}, // optional. if currentUser is not defined, it means the user is Anonymous
-        messages: [
-          {
-            id: 1,
-            username: "Bob",
-            content: "Has anyone seen my marbles?",
-          },
-          {
-            id: 2,
-            username: "Anonymous",
-            content: "No, I think you lost them. You lost your marbles Bob. You lost them for good."
-          }
-        ]
+        messages: [] // messages coming from the server will be stored here as they arrive
     };
 
   }
 
+
+  handleSubmit = (e) => {
+    if (e.key === 'Enter') {
+      let typedInput = e.target.value;
+      e.target.value = "";
+      let newMessage = {username: this.state.currentUser.name, content: typedInput};
+      this.webSock.send(JSON.stringify(newMessage));
+      }
+    }
+
+
   componentDidMount() {
     console.log("componentDidMount <App />");
-    setTimeout(() => {
-      console.log("Simulating incoming message");
-      // Add a new message to the list of messages in the data store
-      const newMessage = {id: 3, username: "Michelle", content: "Hello there!"};
-      const messages = this.state.messages.concat(newMessage)
-      // Update the state of the app component.
-      // Calling setState will trigger a call to render() in App and all child components.
-      this.setState({messages: messages})
-    }, 3000);
+    this.webSock = new WebSocket("ws://localhost:3001");
+    this.webSock.onopen = function (event) {
+      console.log('Connected to server')
+    };
+
+    this.webSock.onmessage = (event) => {
+      // code to handle incoming message
+      let newMessage = JSON.parse(event.data);
+      let messages = this.state.messages.concat(newMessage);
+      this.setState({messages: messages});
+    }
+
   }
 
-
-    handleSubmit = (e) => {
-      if (e.key === 'Enter') {
-        let typedInput = e.target.value;
-        e.target.value = "";
-        let newMessage = {id: this.state.messages.length + 1, username: this.state.currentUser.name, content: typedInput};
-        console.log(newMessage);
-        let messages = this.state.messages.concat(newMessage);
-
-        this.setState({messages: messages});
-        }
-      }
 
   render() {
     console.log("Rendering <App/>");
@@ -65,7 +56,7 @@ class App extends Component {
       </div>
 
     );
-
   }
+
 }
 export default App;
