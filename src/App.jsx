@@ -37,24 +37,20 @@ class App extends Component {
     }, 3000);
   }
 
-  render() {
 
-    const _captureInput = (e) => {
-      let typedInput = e.target.value;
-      console.log(typedInput);
-    }
-
-    const _handleSubmit = (e) => {
+    handleSubmit = (e) => {
       if (e.key === 'Enter') {
-        console.log("enter!!")
         let typedInput = e.target.value;
         e.target.value = "";
-        const newMessage = {id: this.state.messages.length + 1, username: this.state.currentUser.name, content: typedInput};
-        const messages = this.state.messages.concat(newMessage);
-        this.setState({messages: messages});
-      }
-    }
+        let newMessage = {id: this.state.messages.length + 1, username: this.state.currentUser.name, content: typedInput};
+        console.log(newMessage);
+        let messages = this.state.messages.concat(newMessage);
 
+        this.setState({messages: messages});
+        }
+      }
+
+  render() {
     console.log("Rendering <App/>");
     return (
       <div>
@@ -62,7 +58,7 @@ class App extends Component {
           <MessageList messages={this.state.messages} />
         </main>
         <footer>
-          <ChatBar captureInput={_captureInput} handleSubmit={_handleSubmit} name={this.state.currentUser.name} />
+          <ChatBar handleSubmit={this.handleSubmit} name={this.state.currentUser.name} />
         </footer>
 
 
