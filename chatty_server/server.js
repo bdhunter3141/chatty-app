@@ -21,23 +21,36 @@ const wss = new SocketServer({ server });
 // When a client connects they are assigned a socket, represented by
 // the ws parameter in the callback.
 
+const broadcast = (message) => {
+  wss.clients.forEach((client) => {
+    if(wss.readyState === wss.OPEN) {
+    client.send(JSON.stringify(message));
+  }
+  });
+}
+
+let connectionCounter = 0;
 
 wss.on('connection', (ws) =>{
   console.log('Client connected');
+  connectionCounter = connectionCounter + 1;
+  broadcast({type: 'connectionUpdate', id: uuid(), connection: connectionCounter})
+
   ws.onmessage = function (event) {
     let message = JSON.parse(event.data);
-    let messageWithId;
 
     switch (message.type) {
 
       case 'postMessage':
         console.log(`User ${message.username} said ${message.content}`);
-        messageWithId = {type: 'incomingMessage', id: uuid(), username: message.username, content: message.content};
+        let messageWithId = {type: 'incomingMessage', id: uuid(), username: message.username, content: message.content};
+        broadcast(messageWithId);
         break;
 
       case 'postNotification':
         console.log(message.content);
-        messageWithId = {type: 'incomingNotification', id: uuid(), content: message.content};
+        let notificationMessage = {type: 'incomingNotification', id: uuid(), content: message.content};
+        broadcast(notificationMessage);
         break;
 
       default:
@@ -45,13 +58,14 @@ wss.on('connection', (ws) =>{
         throw new Error("Unknown event type " + message.type);
     }
 
-    // Broadcast to everyone else.
-    wss.clients.forEach((client) => {
-      if(wss.readyState === wss.OPEN) {
-      client.send(JSON.stringify(messageWithId));
-    }
-    });
   }
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+
+    console.log('Client disconnected');
+    connectionCounter = connectionCounter - 1;
+    broadcast({type: 'connectionUpdate', id: uuid(), connection: connectionCounter});
+
+    }
+  );
 });

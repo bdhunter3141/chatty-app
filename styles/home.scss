@@ -66,6 +66,9 @@ body {
 }
 
 .navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: tomato;
   border-bottom: 1px solid black;
   height: 60px;
@@ -79,11 +82,15 @@ body {
 .navbar-brand {
   color: inherit;
   display: block;
-  float: left;
   font-weight: 700;
   font-size: 28px;
   height: 60px;
   line-height: 60px;
   padding: 0 10px;
   text-decoration: none;
+}
+
+.navbar-counter {
+  font-size: 14px;
+  padding-right: 20px;
 }

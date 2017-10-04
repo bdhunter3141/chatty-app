@@ -1,12 +1,14 @@
 import React, {Component} from 'react';
 import ChatBar from './ChatBar.jsx';
 import MessageList from './MessageList.jsx';
+import NavBar from './NavBar.jsx';
 
 class App extends Component {
 
    constructor(props) {
     super(props);
     this.state ={
+      connections: 0,
       currentUser: {name: "Bob"}, // optional. if currentUser is not defined, it means the user is Anonymous
         messages: [] // messages coming from the server will be stored here as they arrive
     };
@@ -43,8 +45,16 @@ class App extends Component {
     this.webSock.onmessage = (event) => {
       // code to handle incoming message
       let newMessage = JSON.parse(event.data);
-      let messages = this.state.messages.concat(newMessage);
-      this.setState({messages: messages});
+
+      if (newMessage.type === 'connectionUpdate') {
+        this.setState({connections: newMessage.connection});
+        console.log("Number of connections: ", this.state.connections);
+      }
+
+      if (newMessage.type !== 'connectionUpdate') {
+        let messages = this.state.messages.concat(newMessage);
+        this.setState({messages: messages});
+      }
     }
 
   }
@@ -54,6 +64,7 @@ class App extends Component {
     console.log("Rendering <App/>");
     return (
       <div>
+        <NavBar connections={this.state.connections} />
         <main>
           <MessageList messages={this.state.messages} />
         </main>
