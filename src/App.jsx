@@ -13,12 +13,21 @@ class App extends Component {
 
   }
 
+  handleName = (e) => {
+    const oldUser = this.state.currentUser.name;
+    if (e.key === 'Enter') {
+      let newUser = {name: e.target.value};
+      let notification = {type: 'postNotification', content: `${oldUser} has changed their name to ${newUser.name}.`}
+      this.webSock.send(JSON.stringify(notification));
+      this.setState({currentUser: newUser});
+    }
+  }
 
   handleSubmit = (e) => {
     if (e.key === 'Enter') {
       let typedInput = e.target.value;
       e.target.value = "";
-      let newMessage = {username: this.state.currentUser.name, content: typedInput};
+      let newMessage = {type: 'postMessage', username: this.state.currentUser.name, content: typedInput};
       this.webSock.send(JSON.stringify(newMessage));
       }
     }
@@ -28,7 +37,7 @@ class App extends Component {
     console.log("componentDidMount <App />");
     this.webSock = new WebSocket("ws://localhost:3001");
     this.webSock.onopen = function (event) {
-      console.log('Connected to server')
+      console.log('Connected to server');
     };
 
     this.webSock.onmessage = (event) => {
@@ -49,7 +58,7 @@ class App extends Component {
           <MessageList messages={this.state.messages} />
         </main>
         <footer>
-          <ChatBar handleSubmit={this.handleSubmit} name={this.state.currentUser.name} />
+          <ChatBar handleSubmit={this.handleSubmit} handleName={this.handleName} name={this.state.currentUser.name} />
         </footer>
 
 
