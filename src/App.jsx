@@ -42,17 +42,6 @@ class App extends Component {
     this.webSock = new WebSocket("ws://localhost:3001");
     this.webSock.onopen = (event) => {
       setTimeout(() => {
-        const userColor = ['#F08080', '#2E8B57', '#4682B4', '#B22222'];
-        let userFontColor;
-        if (this.state.connectionCount <= 4) {
-          userFontColor = userColor[this.state.connectionCount -1]
-        } else {
-          userFontColor = userColor[Math.floor(Math.random() * 4)];
-        }
-
-        let currentUserObject = Object.assign({}, this.state.currentUser);
-        currentUserObject.userFontColor = userFontColor;
-        this.setState({currentUser: currentUserObject});
       }, 1000);
       console.log('Connected to server');
     };
@@ -61,19 +50,41 @@ class App extends Component {
       // code to handle incoming message
       let newMessage = JSON.parse(event.data);
 
-      if (newMessage.type === 'connectionUpdate') {
-        this.setState({connectionCount: newMessage.connection});
-        console.log("Number of connections: ", newMessage.connection);
-      }
+      switch (newMessage.type) {
 
-      if (newMessage.type !== 'connectionUpdate') {
-        let messages = this.state.messages.concat(newMessage);
-        this.setState({messages: messages});
+        case 'initialConnection':
+
+          const userColor = ['#F08080', '#2E8B57', '#4682B4', '#B22222'];
+          let userFontColor;
+          if (newMessage.connection <= 4) {
+            userFontColor = userColor[newMessage.connection -1]
+          } else {
+            userFontColor = userColor[Math.floor(Math.random() * 4)];
+          }
+
+          let currentUserObject = Object.assign({}, this.state.currentUser);
+          currentUserObject.userFontColor = userFontColor;
+          this.setState({currentUser: currentUserObject});
+          break;
+
+        case 'connectionUpdate':
+          this.setState({connectionCount: newMessage.connection});
+          console.log("Number of connections: ", newMessage.connection);
+          break;
+
+        default:
+          console.log("new")
+          let messages = this.state.messages.concat(newMessage);
+          this.setState({messages: messages});
+          break;
+
       }
     }
-
   }
 
+  componentDidUpdate() {
+    window.scrollTo(0, document.querySelector(".messages").scrollHeight);
+  }
 
   render() {
     console.log("Rendering <App/>");

@@ -34,8 +34,8 @@ let connectionCounter = 0;
 wss.on('connection', (ws) =>{
   console.log('Client connected');
   connectionCounter = connectionCounter + 1;
-
-  broadcast({type: 'connectionUpdate', id: uuid(), connection: connectionCounter})
+  ws.send(JSON.stringify({type: 'initialConnection', connection: connectionCounter}));
+  broadcast({type: 'connectionUpdate', connection: connectionCounter})
 
   ws.onmessage = function (event) {
     let message = JSON.parse(event.data);
@@ -43,9 +43,21 @@ wss.on('connection', (ws) =>{
     switch (message.type) {
 
       case 'postMessage':
-        console.log(`User ${message.username} said ${message.content}`);
-        let messageWithId = {type: 'incomingMessage', id: uuid(), userColor: message.userColor, username: message.username, content: message.content};
-        broadcast(messageWithId);
+        let content = message.content;
+        console.log(`User ${message.username} said ${content}`);
+        function isImage(test) {
+          return /(https?:\/\/.*\.(?:png|jpg))/i.test(test);
+        }
+        if (isImage(content)) {
+          let contentArr = content.split(' ');
+
+          let messageWithId = {type: 'imageMessage', id: uuid(), userColor: message.userColor, username: message.username, content: contentArr};
+          broadcast(messageWithId);
+
+        } else {
+          let messageWithId = {type: 'incomingMessage', id: uuid(), userColor: message.userColor, username: message.username, content: message.content};
+          broadcast(messageWithId);
+        }
         break;
 
       case 'postNotification':
@@ -65,8 +77,9 @@ wss.on('connection', (ws) =>{
 
     console.log('Client disconnected');
     connectionCounter = connectionCounter - 1;
-    broadcast({type: 'connectionUpdate', id: uuid(), connection: connectionCounter});
+    broadcast({type: 'connectionUpdate', connection: connectionCounter});
 
     }
   );
 });
+
