@@ -1,11 +1,17 @@
 import React, {Component} from 'react';
 
+// Render Messages
 
 class Message extends Component {
 
   render() {
-    console.log("Rendering <Message/>");
+
+    // Set color styling for usernames
+
     let divStyle = {color: this.props.userColor};
+
+
+    // If message type is normal message
 
     if (this.props.type === 'incomingMessage') {
       return (
@@ -16,7 +22,12 @@ class Message extends Component {
       );
     }
 
+
+    // If message type includes an image
+
     if (this.props.type === 'imageMessage') {
+
+      // Check which part of message is an image
 
       function isImage(test) {
         return /(https?:\/\/.*\.(?:png|jpg))/i.test(test);
@@ -25,17 +36,22 @@ class Message extends Component {
       return (
         <div className="message">
           <span style={divStyle} className="message-username">{this.props.username}</span>
-          {this.props.content.map((item, index) =>
-                { return isImage(item) ?
-                  <img src={item} />
+          <div className='message-content'>{this.props.content.map((item, index) =>
+                { return isImage(item) ? // If it's an image, display in image tags
+                  <div>
+                    <img className='message-image' src={item} />
+                  </div>
                   :
-                  <span className="message-content">{item}</span>
+                  <span>{item}</span> // If it is normal text, display normally
                 }
-              )}
+              )}</div>
         </div>
 
       );
     }
+
+
+    // If message is a notification then style accordingly
 
     if (this.props.type === 'incomingNotification') {
       return (

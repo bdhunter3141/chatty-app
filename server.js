@@ -1,6 +1,10 @@
+// Requirements
+
 var webpack = require('webpack');
 var WebpackDevServer = require('webpack-dev-server');
 var config = require('./webpack.config');
+
+// Server
 
 new WebpackDevServer(webpack(config), {
     publicPath: config.output.publicPath,

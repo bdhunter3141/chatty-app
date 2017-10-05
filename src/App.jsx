@@ -15,6 +15,8 @@ class App extends Component {
 
   }
 
+  // Handle a name change
+
   handleName = (e) => {
     const oldUser = this.state.currentUser.name;
     if (e.key === 'Enter') {
@@ -25,6 +27,8 @@ class App extends Component {
       this.setState({currentUser: newUser});
     }
   }
+
+  // Handle submission of message
 
   handleSubmit = (e) => {
     if (e.key === 'Enter') {
@@ -38,7 +42,8 @@ class App extends Component {
 
   componentDidMount() {
 
-    console.log("componentDidMount <App />");
+    // Open new websocket
+
     this.webSock = new WebSocket("ws://localhost:3001");
     this.webSock.onopen = (event) => {
       setTimeout(() => {
@@ -46,18 +51,20 @@ class App extends Component {
       console.log('Connected to server');
     };
 
+    // On new message events
+
     this.webSock.onmessage = (event) => {
-      // code to handle incoming message
+
       let newMessage = JSON.parse(event.data);
 
       switch (newMessage.type) {
 
-        case 'initialConnection':
+        case 'initialConnection': // When user first connects, assigns a color
 
           const userColor = ['#F08080', '#2E8B57', '#4682B4', '#B22222'];
           let userFontColor;
           if (newMessage.connection <= 4) {
-            userFontColor = userColor[newMessage.connection -1]
+            userFontColor = userColor[newMessage.connection -1];
           } else {
             userFontColor = userColor[Math.floor(Math.random() * 4)];
           }
@@ -67,13 +74,11 @@ class App extends Component {
           this.setState({currentUser: currentUserObject});
           break;
 
-        case 'connectionUpdate':
+        case 'connectionUpdate': // When new user connects, updates the user count
           this.setState({connectionCount: newMessage.connection});
-          console.log("Number of connections: ", newMessage.connection);
           break;
 
-        default:
-          console.log("new")
+        default: // Any regular messages
           let messages = this.state.messages.concat(newMessage);
           this.setState({messages: messages});
           break;
@@ -82,12 +87,16 @@ class App extends Component {
     }
   }
 
+  // Scroll to bottom of page with messages
+
   componentDidUpdate() {
     window.scrollTo(0, document.querySelector(".messages").scrollHeight);
   }
 
+
+  // Render page
+
   render() {
-    console.log("Rendering <App/>");
     return (
       <div>
         <NavBar connectionsCount={this.state.connectionCount} />
@@ -103,6 +112,6 @@ class App extends Component {
 
     );
   }
-
 }
+
 export default App;

@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 
+// Render Nav Bar
+
 class NavBar extends Component {
   render() {
-    console.log("Rendering <NavBar/>");
     return (
 
       <nav className='navbar'>
