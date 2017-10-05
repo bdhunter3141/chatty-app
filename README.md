@@ -1,4 +1,4 @@
-React Boilerplate
+Chatty App
 =====================
 
 A simple chat application using web sockets. Send pictures and messages. Features customizable user names.
