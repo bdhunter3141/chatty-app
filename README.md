@@ -18,7 +18,7 @@ open http://localhost:3000
 
 ### Finished Product
 
-!["A screenshot of the chat interface."]()
+!["A screenshot of the chat interface."](https://github.com/bdhunter3141/chatty-app/blob/master/docs/chat-screenshot.png?raw=true)
 
 
 ### Dependencies
