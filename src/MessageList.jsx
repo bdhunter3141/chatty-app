@@ -7,7 +7,7 @@ class MessageList extends Component {
       <div className="messages">
       {this.props.messages.map((message) =>
 
-        <Message type={message.type} key={message.id} username={message.username}
+        <Message userColor={message.userColor} type={message.type} key={message.id} username={message.username}
           content={message.content} />
         )
         }

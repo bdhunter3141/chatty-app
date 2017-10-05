@@ -34,6 +34,7 @@ let connectionCounter = 0;
 wss.on('connection', (ws) =>{
   console.log('Client connected');
   connectionCounter = connectionCounter + 1;
+
   broadcast({type: 'connectionUpdate', id: uuid(), connection: connectionCounter})
 
   ws.onmessage = function (event) {
@@ -43,7 +44,7 @@ wss.on('connection', (ws) =>{
 
       case 'postMessage':
         console.log(`User ${message.username} said ${message.content}`);
-        let messageWithId = {type: 'incomingMessage', id: uuid(), username: message.username, content: message.content};
+        let messageWithId = {type: 'incomingMessage', id: uuid(), userColor: message.userColor, username: message.username, content: message.content};
         broadcast(messageWithId);
         break;
 

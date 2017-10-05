@@ -8,8 +8,8 @@ class App extends Component {
    constructor(props) {
     super(props);
     this.state ={
-      connections: 0,
-      currentUser: {name: "Bob"}, // optional. if currentUser is not defined, it means the user is Anonymous
+      connectionCount: 0,
+      currentUser: {name: 'Anonymous', userFontColor: '#F08080'}, // optional. if currentUser is not defined, it means the user is Anonymous
         messages: [] // messages coming from the server will be stored here as they arrive
     };
 
@@ -18,7 +18,8 @@ class App extends Component {
   handleName = (e) => {
     const oldUser = this.state.currentUser.name;
     if (e.key === 'Enter') {
-      let newUser = {name: e.target.value};
+      let newUser = Object.assign({}, this.state.currentUser);
+      newUser.name = e.target.value;
       let notification = {type: 'postNotification', content: `${oldUser} has changed their name to ${newUser.name}.`}
       this.webSock.send(JSON.stringify(notification));
       this.setState({currentUser: newUser});
@@ -29,16 +30,30 @@ class App extends Component {
     if (e.key === 'Enter') {
       let typedInput = e.target.value;
       e.target.value = "";
-      let newMessage = {type: 'postMessage', username: this.state.currentUser.name, content: typedInput};
+      let newMessage = {type: 'postMessage', userColor: this.state.currentUser.userFontColor, username: this.state.currentUser.name, content: typedInput};
       this.webSock.send(JSON.stringify(newMessage));
       }
     }
 
 
   componentDidMount() {
+
     console.log("componentDidMount <App />");
     this.webSock = new WebSocket("ws://localhost:3001");
-    this.webSock.onopen = function (event) {
+    this.webSock.onopen = (event) => {
+      setTimeout(() => {
+        const userColor = ['#F08080', '#2E8B57', '#4682B4', '#B22222'];
+        let userFontColor;
+        if (this.state.connectionCount <= 4) {
+          userFontColor = userColor[this.state.connectionCount -1]
+        } else {
+          userFontColor = userColor[Math.floor(Math.random() * 4)];
+        }
+
+        let currentUserObject = Object.assign({}, this.state.currentUser);
+        currentUserObject.userFontColor = userFontColor;
+        this.setState({currentUser: currentUserObject});
+      }, 1000);
       console.log('Connected to server');
     };
 
@@ -47,8 +62,8 @@ class App extends Component {
       let newMessage = JSON.parse(event.data);
 
       if (newMessage.type === 'connectionUpdate') {
-        this.setState({connections: newMessage.connection});
-        console.log("Number of connections: ", this.state.connections);
+        this.setState({connectionCount: newMessage.connection});
+        console.log("Number of connections: ", newMessage.connection);
       }
 
       if (newMessage.type !== 'connectionUpdate') {
@@ -64,7 +79,7 @@ class App extends Component {
     console.log("Rendering <App/>");
     return (
       <div>
-        <NavBar connections={this.state.connections} />
+        <NavBar connectionsCount={this.state.connectionCount} />
         <main>
           <MessageList messages={this.state.messages} />
         </main>
